@@ -2,755 +2,703 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#111827">
-
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0f172a">
   <title>デュエマ価格比較</title>
-
   <style>
-    * {
-      box-sizing: border-box;
-    }
-
+    * { box-sizing: border-box; }
     body {
       margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
-        "Hiragino Sans", "Yu Gothic", sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Yu Gothic", sans-serif;
       background: #0f172a;
       color: #f8fafc;
     }
-
-    .container {
-      width: 100%;
-      max-width: 700px;
-      margin: 0 auto;
-      padding: 20px 16px 50px;
+    button, input, textarea, select { font: inherit; }
+    .container { max-width: 760px; margin: 0 auto; padding: 18px 14px 60px; }
+    h1 { text-align: center; font-size: 27px; margin: 10px 0 4px; }
+    .subtitle { text-align: center; color: #94a3b8; font-size: 13px; margin-bottom: 20px; }
+    .card { background: #1e293b; border: 1px solid #334155; border-radius: 16px; padding: 16px; margin-bottom: 16px; }
+    .section-title { font-size: 18px; font-weight: 800; margin-bottom: 12px; }
+    .help { color: #94a3b8; font-size: 12px; line-height: 1.6; margin-top: 10px; }
+    input, textarea, select {
+      width: 100%; border: 1px solid #475569; background: #0f172a; color: #fff;
+      border-radius: 10px; padding: 11px; outline: none;
     }
-
-    h1 {
-      text-align: center;
-      font-size: 28px;
-      margin: 15px 0 8px;
+    input:focus, textarea:focus, select:focus { border-color: #3b82f6; }
+    textarea { min-height: 104px; resize: vertical; }
+    button { border: 0; border-radius: 10px; padding: 11px 10px; font-weight: 800; cursor: pointer; }
+    .primary { background: #2563eb; color: #fff; }
+    .secondary { background: #334155; color: #fff; }
+    .danger { background: #7f1d1d; color: #fff; }
+    .small { padding: 8px 9px; font-size: 12px; }
+    .shop-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 10px; }
+    .search-wrap { position: relative; }
+    .suggestions {
+      display: none; position: absolute; left: 0; right: 0; top: calc(100% + 6px); z-index: 20;
+      background: #111827; border: 1px solid #475569; border-radius: 12px; overflow: hidden;
+      box-shadow: 0 10px 28px rgba(0,0,0,.35); max-height: 320px; overflow-y: auto;
     }
-
-    .subtitle {
-      text-align: center;
-      color: #94a3b8;
-      font-size: 14px;
-      margin-bottom: 25px;
+    .suggestion-btn {
+      width: 100%; text-align: left; border-radius: 0; background: #111827; color: #f8fafc;
+      padding: 11px 12px; border-bottom: 1px solid #273449; font-weight: 700;
     }
-
-    .card {
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 16px;
-      padding: 18px;
-      margin-bottom: 18px;
-    }
-
-    .section-title {
-      font-size: 18px;
-      font-weight: bold;
-      margin-bottom: 12px;
-    }
-
-    input {
-      width: 100%;
-      border: 1px solid #475569;
-      background: #0f172a;
-      color: white;
-      font-size: 16px;
-      padding: 13px;
-      border-radius: 10px;
-      outline: none;
-    }
-
-    input:focus {
-      border-color: #3b82f6;
-    }
-
-    .shop-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-top: 15px;
-    }
-
-    button {
-      border: none;
-      border-radius: 10px;
-      padding: 13px 8px;
-      font-size: 14px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    .shop-button {
-      background: #334155;
-      color: white;
-    }
-
-    .shop-button:active {
-      background: #475569;
-    }
-
-    .compare-button {
-      width: 100%;
-      background: #2563eb;
-      color: white;
-      font-size: 17px;
-      margin-top: 15px;
-    }
-
-    .reset-button {
-      width: 100%;
-      background: #475569;
-      color: white;
-      margin-top: 10px;
-    }
-
-    .shop-row {
-      border-bottom: 1px solid #334155;
-      padding: 14px 0;
-    }
-
-    .shop-row:last-child {
-      border-bottom: none;
-    }
-
-    .shop-name {
-      font-weight: bold;
-      margin-bottom: 9px;
-      font-size: 16px;
-    }
-
-    .price-area {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-    }
-
-    .price-box label {
-      display: block;
-      font-size: 12px;
-      color: #94a3b8;
-      margin-bottom: 5px;
-    }
-
-    .price-box input {
-      padding: 10px;
-      font-size: 15px;
-    }
-
-    .total {
-      text-align: right;
-      margin-top: 8px;
-      font-size: 14px;
-      color: #cbd5e1;
-    }
-
-    #result {
-      display: none;
-      text-align: center;
-      padding: 22px 15px;
-      border-radius: 14px;
-      background: #064e3b;
-      border: 1px solid #10b981;
-      margin-top: 15px;
-    }
-
-    .winner-label {
-      color: #a7f3d0;
-      font-size: 14px;
-    }
-
-    .winner-shop {
-      font-size: 25px;
-      font-weight: bold;
-      margin: 8px 0;
-    }
-
-    .winner-price {
-      font-size: 21px;
-      font-weight: bold;
-    }
-
-    .note {
-      font-size: 12px;
-      color: #94a3b8;
-      line-height: 1.7;
-      margin-top: 15px;
-    }
-
-    @media (max-width: 420px) {
-      .shop-grid {
-        grid-template-columns: 1fr 1fr;
-      }
-
-      h1 {
-        font-size: 25px;
-      }
+    .suggestion-btn:last-child { border-bottom: 0; }
+    .suggestion-btn:active { background: #243047; }
+    .suggestion-meta { color: #94a3b8; font-size: 11px; font-weight: 500; margin-top: 2px; }
+    .search-tools { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+    .shop-btn { background: #334155; color: #fff; }
+    .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+    .deck-item { border: 1px solid #334155; border-radius: 14px; padding: 13px; margin-top: 12px; background: #172033; }
+    .deck-head { display: grid; grid-template-columns: 1fr 78px 42px; gap: 8px; align-items: center; }
+    .deck-name { font-weight: 800; word-break: break-word; }
+    .qty-wrap label { color: #94a3b8; font-size: 10px; display: block; margin-bottom: 3px; }
+    .qty { padding: 8px; text-align: center; }
+    .remove { background: #7f1d1d; color: #fff; padding: 8px 0; }
+    .price-list { margin-top: 11px; display: grid; gap: 7px; }
+    .price-row { display: grid; grid-template-columns: minmax(95px, 1fr) 92px 58px; gap: 7px; align-items: center; }
+    .price-row .shop-label { font-size: 13px; font-weight: 700; }
+    .price-row input { padding: 8px; text-align: right; }
+    .shipping-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .shipping-box { border: 1px solid #334155; border-radius: 10px; padding: 9px; }
+    .shipping-box label { font-size: 12px; font-weight: 700; display: block; margin-bottom: 5px; }
+    .shipping-box input { padding: 8px; }
+    .result-box { display: none; margin-top: 14px; }
+    .rank-row { display: grid; grid-template-columns: 34px 1fr auto; gap: 8px; align-items: center; padding: 11px 0; border-bottom: 1px solid #334155; }
+    .rank-row:last-child { border-bottom: 0; }
+    .rank { font-size: 18px; font-weight: 900; }
+    .rank-shop { font-weight: 800; }
+    .rank-note { color: #94a3b8; font-size: 11px; margin-top: 2px; }
+    .rank-price { font-size: 17px; font-weight: 900; text-align: right; }
+    .winner { background: #064e3b; border: 1px solid #10b981; border-radius: 12px; padding: 13px; margin-bottom: 10px; }
+    .winner strong { font-size: 20px; }
+    .mix-plan { margin-top: 10px; border-top: 1px solid #334155; padding-top: 10px; }
+    .mix-line { font-size: 12px; line-height: 1.7; color: #cbd5e1; }
+    .pill { display: inline-block; background: #0f172a; border: 1px solid #475569; border-radius: 999px; padding: 4px 8px; font-size: 11px; color: #cbd5e1; margin: 2px 3px 2px 0; }
+    .empty { color: #94a3b8; text-align: center; padding: 18px 4px 4px; font-size: 13px; }
+    @media (max-width: 460px) {
+      .price-row { grid-template-columns: minmax(92px, 1fr) 82px 54px; }
+      .shipping-grid { grid-template-columns: 1fr; }
+      .deck-head { grid-template-columns: 1fr 72px 40px; }
     }
   </style>
 </head>
-
 <body>
+  <div class="container">
+    <h1>デュエマ価格比較</h1>
+    <div class="subtitle">単品検索・デッキ総額・買い分け最安を1つで比較</div>
 
-<div class="container">
+    <section class="card">
+      <div class="section-title">カードを検索</div>
+      <div class="search-wrap">
+        <input id="singleCard" type="text" autocomplete="off" placeholder="例：コッコ / ルピア / コッコルピア">
+        <div id="suggestions" class="suggestions"></div>
+      </div>
+      <div class="search-tools">
+        <button class="secondary" onclick="openOfficialSearch()">公式カード検索</button>
+        <button class="secondary" onclick="clearSingleSearch()">入力をクリア</button>
+      </div>
+      <div class="shop-grid" id="singleShopButtons"></div>
+      <div class="help">カード名は途中まででOKです。「コッコ」「ルピア」「コッコルピア」のように入力できます。候補をタップすると正式名を入れられます。候補に無いカードは「公式カード検索」で確認できます。</div>
+    </section>
 
-  <h1>デュエマ価格比較</h1>
+    <section class="card">
+      <div class="section-title">デッキを登録</div>
+      <textarea id="deckInput" placeholder="1行に1種類ずつ入力\n例：\n4 支配の精霊ペルフェクト\nヘブンズ・ゲート x4\n∞龍 ゲンムエンペラー"></textarea>
+      <div class="actions">
+        <button class="primary" onclick="addDeckText()">デッキに追加</button>
+        <button class="danger" onclick="clearDeck()">デッキを全削除</button>
+      </div>
+      <div class="help">「4 カード名」「カード名 x4」「カード名」どれでも登録できます。登録内容と価格はこの端末に自動保存します。</div>
+    </section>
 
-  <div class="subtitle">
-    欲しいカードを一番安く買えるショップを比較
+    <section class="card">
+      <div class="section-title">登録カードと各店の単価</div>
+      <div id="deckList"></div>
+      <div class="help">各カードの1枚あたり価格を入力してください。「検索」でそのカードをショップ検索できます。未入力の価格は比較に使いません。</div>
+    </section>
+
+    <section class="card">
+      <div class="section-title">送料・手数料</div>
+      <div class="shipping-grid" id="shippingGrid"></div>
+      <div class="help">ショップごとに1回だけ加算します。送料無料なら0円です。</div>
+    </section>
+
+    <section class="card">
+      <button class="primary" style="width:100%;font-size:17px" onclick="compareDeck()">デッキ全体の最安を計算</button>
+      <div id="resultBox" class="result-box"></div>
+      <div class="help">「1店舗で全部買う場合」と「複数ショップに買い分ける場合」の両方を計算します。買い分けは入力済み価格と送料から最小総額を探します。</div>
+    </section>
   </div>
-
-
-  <div class="card">
-
-    <div class="section-title">
-      カード検索
-    </div>
-
-    <input
-      id="cardName"
-      type="text"
-      placeholder="例：支配の精霊ペルフェクト"
-    >
-
-    <div class="shop-grid">
-
-      <button class="shop-button"
-        onclick="searchShop('カードラッシュ')">
-        カードラッシュ
-      </button>
-
-      <button class="shop-button"
-        onclick="searchShop('カーナベル')">
-        カーナベル
-      </button>
-
-      <button class="shop-button"
-        onclick="searchShop('駿河屋')">
-        駿河屋
-      </button>
-
-      <button class="shop-button"
-        onclick="searchShop('遊々亭')">
-        遊々亭
-      </button>
-
-      <button class="shop-button"
-        onclick="searchShop('Amazon')">
-        Amazon
-      </button>
-
-      <button class="shop-button"
-        onclick="searchShop('楽天市場')">
-        楽天
-      </button>
-
-      <button class="shop-button"
-        onclick="searchShop('Yahooショッピング')">
-        Yahoo!
-      </button>
-
-      <button class="shop-button"
-        onclick="searchShop('メルカリ')">
-        メルカリ
-      </button>
-
-    </div>
-
-    <div class="note">
-      カード名を入力してショップを押すと、そのカードを検索します。
-    </div>
-
-  </div>
-
-
-  <div class="card">
-
-    <div class="section-title">
-      価格を比較
-    </div>
-
-
-    <div class="shop-row">
-
-      <div class="shop-name">
-        カードラッシュ
-      </div>
-
-      <div class="price-area">
-
-        <div class="price-box">
-          <label>カード価格</label>
-          <input
-            type="number"
-            class="price"
-            data-shop="カードラッシュ"
-            placeholder="0"
-          >
-        </div>
-
-        <div class="price-box">
-          <label>送料</label>
-          <input
-            type="number"
-            class="shipping"
-            placeholder="0"
-          >
-        </div>
-
-      </div>
-
-      <div class="total"></div>
-
-    </div>
-
-
-    <div class="shop-row">
-
-      <div class="shop-name">
-        カーナベル
-      </div>
-
-      <div class="price-area">
-
-        <div class="price-box">
-          <label>カード価格</label>
-          <input
-            type="number"
-            class="price"
-            data-shop="カーナベル"
-            placeholder="0"
-          >
-        </div>
-
-        <div class="price-box">
-          <label>送料</label>
-          <input
-            type="number"
-            class="shipping"
-            placeholder="0"
-          >
-        </div>
-
-      </div>
-
-      <div class="total"></div>
-
-    </div>
-
-
-    <div class="shop-row">
-
-      <div class="shop-name">
-        駿河屋
-      </div>
-
-      <div class="price-area">
-
-        <div class="price-box">
-          <label>カード価格</label>
-          <input
-            type="number"
-            class="price"
-            data-shop="駿河屋"
-            placeholder="0"
-          >
-        </div>
-
-        <div class="price-box">
-          <label>送料・手数料</label>
-          <input
-            type="number"
-            class="shipping"
-            placeholder="0"
-          >
-        </div>
-
-      </div>
-
-      <div class="total"></div>
-
-    </div>
-
-
-    <div class="shop-row">
-
-      <div class="shop-name">
-        遊々亭
-      </div>
-
-      <div class="price-area">
-
-        <div class="price-box">
-          <label>カード価格</label>
-          <input
-            type="number"
-            class="price"
-            data-shop="遊々亭"
-            placeholder="0"
-          >
-        </div>
-
-        <div class="price-box">
-          <label>送料</label>
-          <input
-            type="number"
-            class="shipping"
-            placeholder="0"
-          >
-        </div>
-
-      </div>
-
-      <div class="total"></div>
-
-    </div>
-
-
-    <div class="shop-row">
-
-      <div class="shop-name">
-        Amazon
-      </div>
-
-      <div class="price-area">
-
-        <div class="price-box">
-          <label>カード価格</label>
-          <input
-            type="number"
-            class="price"
-            data-shop="Amazon"
-            placeholder="0"
-          >
-        </div>
-
-        <div class="price-box">
-          <label>送料</label>
-          <input
-            type="number"
-            class="shipping"
-            placeholder="0"
-          >
-        </div>
-
-      </div>
-
-      <div class="total"></div>
-
-    </div>
-
-
-    <div class="shop-row">
-
-      <div class="shop-name">
-        楽天市場
-      </div>
-
-      <div class="price-area">
-
-        <div class="price-box">
-          <label>カード価格</label>
-          <input
-            type="number"
-            class="price"
-            data-shop="楽天市場"
-            placeholder="0"
-          >
-        </div>
-
-        <div class="price-box">
-          <label>送料</label>
-          <input
-            type="number"
-            class="shipping"
-            placeholder="0"
-          >
-        </div>
-
-      </div>
-
-      <div class="total"></div>
-
-    </div>
-
-
-    <div class="shop-row">
-
-      <div class="shop-name">
-        Yahoo!ショッピング
-      </div>
-
-      <div class="price-area">
-
-        <div class="price-box">
-          <label>カード価格</label>
-          <input
-            type="number"
-            class="price"
-            data-shop="Yahoo!ショッピング"
-            placeholder="0"
-          >
-        </div>
-
-        <div class="price-box">
-          <label>送料</label>
-          <input
-            type="number"
-            class="shipping"
-            placeholder="0"
-          >
-        </div>
-
-      </div>
-
-      <div class="total"></div>
-
-    </div>
-
-
-    <div class="shop-row">
-
-      <div class="shop-name">
-        メルカリ
-      </div>
-
-      <div class="price-area">
-
-        <div class="price-box">
-          <label>カード価格</label>
-          <input
-            type="number"
-            class="price"
-            data-shop="メルカリ"
-            placeholder="0"
-          >
-        </div>
-
-        <div class="price-box">
-          <label>送料</label>
-          <input
-            type="number"
-            class="shipping"
-            placeholder="0"
-          >
-        </div>
-
-      </div>
-
-      <div class="total"></div>
-
-    </div>
-
-
-    <button
-      class="compare-button"
-      onclick="comparePrices()">
-      最安値を調べる
-    </button>
-
-    <button
-      class="reset-button"
-      onclick="resetPrices()">
-      入力をリセット
-    </button>
-
-
-    <div id="result">
-
-      <div class="winner-label">
-        一番安いショップ
-      </div>
-
-      <div
-        id="winnerShop"
-        class="winner-shop">
-      </div>
-
-      <div
-        id="winnerPrice"
-        class="winner-price">
-      </div>
-
-    </div>
-
-
-    <div class="note">
-      価格を入力していないショップは比較対象から除外されます。
-      送料や通販手数料も含めて比較できます。
-    </div>
-
-  </div>
-
-</div>
-
 
 <script>
+const SHOPS = [
+  { id: 'cardrush', name: 'カードラッシュ' },
+  { id: 'kanabell', name: 'カーナベル' },
+  { id: 'surugaya', name: '駿河屋' },
+  { id: 'yuyutei', name: '遊々亭' },
+  { id: 'amazon', name: 'Amazon' },
+  { id: 'rakuten', name: '楽天市場' },
+  { id: 'yahoo', name: 'Yahoo!ショッピング' },
+  { id: 'mercari', name: 'メルカリ' }
+];
 
-function searchShop(shop) {
+const STORAGE_KEY = 'dm-price-compare-v2';
+let state = loadState();
 
-  const card =
-    document.getElementById("cardName").value.trim();
-
-  if (!card) {
-
-    alert("カード名を入力してください");
-
-    return;
-
-  }
-
-  const query =
-    encodeURIComponent(
-      "デュエルマスターズ " +
-      card +
-      " " +
-      shop
-    );
-
-  const url =
-    "https://www.google.com/search?q=" +
-    query;
-
-  window.open(
-    url,
-    "_blank"
-  );
-
+function blankState() {
+  return {
+    deck: [],
+    shipping: Object.fromEntries(SHOPS.map(s => [s.id, 0])),
+    searchHistory: []
+  };
 }
 
+function loadState() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    if (!saved || !Array.isArray(saved.deck)) return blankState();
+    saved.shipping = saved.shipping || {};
+    saved.searchHistory = Array.isArray(saved.searchHistory) ? saved.searchHistory : [];
+    SHOPS.forEach(s => {
+      if (saved.shipping[s.id] == null) saved.shipping[s.id] = 0;
+    });
+    saved.deck.forEach(card => {
+      card.prices = card.prices || {};
+    });
+    return saved;
+  } catch (_) {
+    return blankState();
+  }
+}
 
-function comparePrices() {
+function saveState() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
 
-  const rows =
-    document.querySelectorAll(".shop-row");
+function esc(s) {
+  return String(s)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+}
 
-  let cheapestShop = "";
-  let cheapestPrice = Infinity;
-  let found = false;
+const STARTER_CARD_NAMES = [
+  'コッコ・ルピア',
+  'コッコ・武・ルピア',
+  'コッコ・ルピア GS',
+  '支配の精霊ペルフェクト',
+  'ヘブンズ・ゲート',
+  '巨大設計図',
+  '闘門の精霊ウェルキウス',
+  '∞龍 ゲンムエンペラー',
+  '理想と平和の決断',
+  '光開の精霊サイフォゲート',
+  'ボルシャック・ドラゴン',
+  'ボルシャック・ドギラゴン',
+  'ボルシャック・栄光・ルピア',
+  'ボルシャック・NEX',
+  'ボルシャック・クロス・NEX',
+  'メンデルスゾーン',
+  'フェアリー・ライフ',
+  'フェアリー・Re:ライフ',
+  '地龍神の魔陣',
+  '天災 デドダム',
+  '飛翔龍 5000VT',
+  'CRYMAX ジャオウガ',
+  '禁断竜王 Vol-Val-8',
+  '蒼き団長 ドギラゴン剣',
+  '時の法皇 ミラダンテXII',
+  '音卿の精霊龍 ラフルル・ラブ',
+  '流星のガイアッシュ・カイザー',
+  '切札勝太＆カツキング －熱血の物語－',
+  '龍風混成 ザーディクリカ',
+  'ロスト・Re:ソウル',
+  'デーモン・ハンド',
+  'ホーリー・スパーク',
+  '終止の時計 ザ・ミュート',
+  '同期の妖精／ド浮きの動悸',
+  'アーテル・ゴルギーニ',
+  'DARK MATERIAL COMPLEX',
+  '超霊淵 ヤバーダン＝ロウ',
+  '絶望と反魂と滅殺の決断',
+  '百威と族絆の決断',
+  '氷柱と炎弧の決断',
+  '邪魂転生',
+  '母なる星域',
+  '母なる大地',
+  '深淵の壊炉 マーダン＝ロウ',
+  '謀遠 テレスコ＝テレス',
+  '芸魔王将 カクメイジン',
+  '瞬閃と疾駆と双撃の決断',
+  'Napo獅子-Vi無粋／♪オレの歌 聞けよ聞かなきゃ 殴り合い',
+  'AQvibrato',
+  '灼熱の演奏 テスタ・ロッサ',
+  '赤い稲妻 テスタ・ロッサ',
+  '奇天烈 シャッフ',
+  '単騎連射 マグナム',
+  '異端流し オニカマス',
+  'とこしえの超人',
+  '検問の守り 輝羅',
+  'キャディ・ビートル',
+  '若き大長老 アプル',
+  'ポクチンちん',
+  'DG-パルテノン ～龍の創り出される地～'
+];
 
+function normalizeCardName(value) {
+  return String(value || '')
+    .normalize('NFKC')
+    .toLowerCase()
+    .replace(/[\s　・･\-‐‑‒–—―_＿\/／\\「」『』【】〖〗（）()［］\[\]〈〉《》“”"'’‘！!？?：:・,.，。]/g, '');
+}
 
-  rows.forEach(row => {
+function knownCardNames() {
+  const names = [
+    ...STARTER_CARD_NAMES,
+    ...(state.searchHistory || []),
+    ...state.deck.map(c => c.name)
+  ].filter(Boolean);
+  return [...new Set(names)];
+}
 
-    const priceInput =
-      row.querySelector(".price");
+function rememberSearch(name) {
+  const value = String(name || '').trim();
+  if (!value) return;
+  state.searchHistory = [value, ...(state.searchHistory || []).filter(x => x !== value)].slice(0, 80);
+  saveState();
+}
 
-    const shippingInput =
-      row.querySelector(".shipping");
+function findSuggestions(query, limit = 12) {
+  const q = normalizeCardName(query);
+  if (!q) return [];
+  return knownCardNames()
+    .map(name => {
+      const n = normalizeCardName(name);
+      const pos = n.indexOf(q);
+      if (pos < 0) return null;
+      let score = 1000 - pos * 20 - Math.max(0, n.length - q.length);
+      if (n.startsWith(q)) score += 400;
+      if (n === q) score += 1000;
+      return { name, score };
+    })
+    .filter(Boolean)
+    .sort((a, b) => b.score - a.score || a.name.localeCompare(b.name, 'ja'))
+    .slice(0, limit);
+}
 
-    const totalDisplay =
-      row.querySelector(".total");
+function renderSuggestions() {
+  const input = document.getElementById('singleCard');
+  const box = document.getElementById('suggestions');
+  if (!input || !box) return;
+  const query = input.value.trim();
+  const matches = findSuggestions(query);
+  if (!query || !matches.length) {
+    box.style.display = 'none';
+    box.innerHTML = '';
+    return;
+  }
+  box.innerHTML = matches.map(item => `
+    <button class="suggestion-btn" type="button" onclick="selectSuggestion(${JSON.stringify(item.name).replace(/"/g, '&quot;')})">
+      ${esc(item.name)}
+      <div class="suggestion-meta">部分一致候補</div>
+    </button>`).join('');
+  box.style.display = 'block';
+}
 
+function selectSuggestion(name) {
+  const input = document.getElementById('singleCard');
+  input.value = name;
+  rememberSearch(name);
+  const box = document.getElementById('suggestions');
+  box.style.display = 'none';
+}
 
-    const price =
-      Number(priceInput.value);
+function officialSearchUrl(cardName) {
+  const card = String(cardName || '').trim();
+  const v = {
+    suggest: 'on',
+    keyword: card,
+    keyword_type: ['card_name', 'card_ruby'],
+    culture_cond: ['単色', '多色'],
+    pagenum: '1',
+    samename: 'show',
+    sort: 'release_new'
+  };
+  return 'https://dm.takaratomy.co.jp/card/?v=' + encodeURIComponent(JSON.stringify(v));
+}
 
-    const shipping =
-      Number(shippingInput.value || 0);
+function openOfficialSearch() {
+  const card = document.getElementById('singleCard').value.trim();
+  if (!card) {
+    alert('カード名の一部を入力してください');
+    return;
+  }
+  rememberSearch(card);
+  window.open(officialSearchUrl(card), '_blank');
+}
 
+function clearSingleSearch() {
+  const input = document.getElementById('singleCard');
+  input.value = '';
+  document.getElementById('suggestions').style.display = 'none';
+  input.focus();
+}
 
-    if (
-      priceInput.value !== "" &&
-      price > 0
-    ) {
+function searchUrl(shopId, cardName) {
+  const card = cardName.trim();
+  const q = encodeURIComponent(card);
+  const dmq = encodeURIComponent('デュエルマスターズ ' + card);
 
-      const total =
-        price + shipping;
+  switch (shopId) {
+    case 'amazon':
+      return 'https://www.amazon.co.jp/s?k=' + dmq;
+    case 'rakuten':
+      return 'https://search.rakuten.co.jp/search/mall/' + dmq + '/';
+    case 'yahoo':
+      return 'https://search.shopping.yahoo.co.jp/search?p=' + dmq;
+    case 'mercari':
+      return 'https://jp.mercari.com/search?keyword=' + dmq;
+    case 'surugaya':
+      return 'https://www.suruga-ya.jp/search?category=501080020&search_word=' + q;
+    case 'cardrush':
+      return 'https://www.google.com/search?q=' + encodeURIComponent('site:cardrush-dm.jp ' + card);
+    case 'kanabell':
+      return 'https://www.google.com/search?q=' + encodeURIComponent('site:ka-nabell.com デュエルマスターズ ' + card);
+    case 'yuyutei':
+      return 'https://www.google.com/search?q=' + encodeURIComponent('site:yuyu-tei.jp デュエルマスターズ ' + card);
+    default:
+      return 'https://www.google.com/search?q=' + dmq;
+  }
+}
 
-      totalDisplay.textContent =
-        "合計 " +
-        total.toLocaleString() +
-        "円";
+function openSearch(shopId, cardName) {
+  if (!cardName || !cardName.trim()) {
+    alert('カード名を入力してください');
+    return;
+  }
+  rememberSearch(cardName);
+  window.open(searchUrl(shopId, cardName), '_blank');
+}
 
+function renderSingleButtons() {
+  const box = document.getElementById('singleShopButtons');
+  box.innerHTML = SHOPS.map(s =>
+    `<button class="shop-btn" onclick="openSearch('${s.id}', document.getElementById('singleCard').value)">${esc(s.name)}</button>`
+  ).join('');
+}
 
-      if (total < cheapestPrice) {
+function parseDeckLine(line) {
+  let text = line.trim();
+  if (!text) return null;
+  let qty = 1;
 
-        cheapestPrice = total;
-
-        cheapestShop =
-          priceInput.dataset.shop;
-
-        found = true;
-
-      }
-
-    } else {
-
-      totalDisplay.textContent = "";
-
+  let m = text.match(/^(\d+)\s+(.+)$/);
+  if (m) {
+    qty = Math.max(1, Number(m[1]));
+    text = m[2].trim();
+  } else {
+    m = text.match(/^(.+?)\s*[x×]\s*(\d+)$/i);
+    if (m) {
+      text = m[1].trim();
+      qty = Math.max(1, Number(m[2]));
     }
+  }
 
+  if (!text) return null;
+  return { name: text, qty };
+}
+
+function addDeckText() {
+  const textarea = document.getElementById('deckInput');
+  const lines = textarea.value.split(/\r?\n/);
+  let added = 0;
+
+  lines.forEach(line => {
+    const parsed = parseDeckLine(line);
+    if (!parsed) return;
+
+    const existing = state.deck.find(c => c.name === parsed.name);
+    if (existing) {
+      existing.qty += parsed.qty;
+    } else {
+      state.deck.push({
+        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 8),
+        name: parsed.name,
+        qty: parsed.qty,
+        prices: {}
+      });
+    }
+    added++;
   });
 
-
-  if (!found) {
-
-    alert(
-      "比較する価格を入力してください"
-    );
-
+  if (!added) {
+    alert('カード名を入力してください');
     return;
-
   }
 
-
-  document.getElementById(
-    "winnerShop"
-  ).textContent =
-    cheapestShop;
-
-
-  document.getElementById(
-    "winnerPrice"
-  ).textContent =
-    cheapestPrice.toLocaleString() +
-    "円";
-
-
-  document.getElementById(
-    "result"
-  ).style.display =
-    "block";
-
+  textarea.value = '';
+  saveState();
+  renderDeck();
 }
 
-
-function resetPrices() {
-
-  document
-    .querySelectorAll(
-      ".price, .shipping"
-    )
-    .forEach(input => {
-
-      input.value = "";
-
-    });
-
-
-  document
-    .querySelectorAll(
-      ".total"
-    )
-    .forEach(total => {
-
-      total.textContent = "";
-
-    });
-
-
-  document.getElementById(
-    "result"
-  ).style.display =
-    "none";
-
+function updateQty(cardId, value) {
+  const card = state.deck.find(c => c.id === cardId);
+  if (!card) return;
+  card.qty = Math.max(1, Number(value) || 1);
+  saveState();
 }
 
+function updatePrice(cardId, shopId, value) {
+  const card = state.deck.find(c => c.id === cardId);
+  if (!card) return;
+  if (value === '') {
+    delete card.prices[shopId];
+  } else {
+    const n = Number(value);
+    if (Number.isFinite(n) && n >= 0) card.prices[shopId] = n;
+  }
+  saveState();
+}
+
+function removeCard(cardId) {
+  state.deck = state.deck.filter(c => c.id !== cardId);
+  saveState();
+  renderDeck();
+  document.getElementById('resultBox').style.display = 'none';
+}
+
+function clearDeck() {
+  if (!state.deck.length) return;
+  if (!confirm('登録したデッキと価格をすべて削除しますか？')) return;
+  state.deck = [];
+  saveState();
+  renderDeck();
+  document.getElementById('resultBox').style.display = 'none';
+}
+
+function openCardSearch(shopId, cardId) {
+  const card = state.deck.find(c => c.id === cardId);
+  if (!card) return;
+  openSearch(shopId, card.name);
+}
+
+function renderDeck() {
+  const box = document.getElementById('deckList');
+  if (!state.deck.length) {
+    box.innerHTML = '<div class="empty">まだカードが登録されていません。</div>';
+    return;
+  }
+
+  box.innerHTML = state.deck.map(card => {
+    const rows = SHOPS.map(shop => {
+      const val = card.prices[shop.id] ?? '';
+      return `
+        <div class="price-row">
+          <div class="shop-label">${esc(shop.name)}</div>
+          <input type="number" min="0" inputmode="numeric" placeholder="単価" value="${val}"
+            onchange="updatePrice('${card.id}','${shop.id}',this.value)">
+          <button class="secondary small" onclick="openCardSearch('${shop.id}','${card.id}')">検索</button>
+        </div>`;
+    }).join('');
+
+    return `
+      <div class="deck-item">
+        <div class="deck-head">
+          <div class="deck-name">${esc(card.name)}</div>
+          <div class="qty-wrap">
+            <label>枚数</label>
+            <input class="qty" type="number" min="1" inputmode="numeric" value="${card.qty}"
+              onchange="updateQty('${card.id}',this.value)">
+          </div>
+          <button class="remove" onclick="removeCard('${card.id}')">×</button>
+        </div>
+        <div class="price-list">${rows}</div>
+      </div>`;
+  }).join('');
+}
+
+function renderShipping() {
+  const box = document.getElementById('shippingGrid');
+  box.innerHTML = SHOPS.map(shop => `
+    <div class="shipping-box">
+      <label>${esc(shop.name)}</label>
+      <input type="number" min="0" inputmode="numeric" value="${state.shipping[shop.id] ?? 0}"
+        onchange="updateShipping('${shop.id}',this.value)">
+    </div>`
+  ).join('');
+}
+
+function updateShipping(shopId, value) {
+  const n = Number(value);
+  state.shipping[shopId] = Number.isFinite(n) && n >= 0 ? n : 0;
+  saveState();
+}
+
+function compareDeck() {
+  if (!state.deck.length) {
+    alert('先にデッキを登録してください');
+    return;
+  }
+
+  const complete = [];
+  const incomplete = [];
+
+  SHOPS.forEach(shop => {
+    let itemTotal = 0;
+    let missing = 0;
+
+    state.deck.forEach(card => {
+      const price = card.prices[shop.id];
+      if (price == null || price === '') {
+        missing++;
+      } else {
+        itemTotal += Number(price) * Number(card.qty);
+      }
+    });
+
+    if (missing === 0) {
+      complete.push({
+        shop,
+        itemTotal,
+        shipping: Number(state.shipping[shop.id] || 0),
+        total: itemTotal + Number(state.shipping[shop.id] || 0)
+      });
+    } else {
+      incomplete.push({ shop, missing });
+    }
+  });
+
+  complete.sort((a, b) => a.total - b.total);
+  const mixed = calculateMixedPlan();
+
+  const result = document.getElementById('resultBox');
+  let html = '';
+
+  if (complete.length) {
+    const best = complete[0];
+    html += `
+      <div class="winner">
+        <div style="font-size:12px;color:#a7f3d0">1店舗で全部買う最安</div>
+        <strong>${esc(best.shop.name)}</strong>
+        <div style="font-size:20px;font-weight:900;margin-top:5px">${best.total.toLocaleString()}円</div>
+        <div style="font-size:11px;color:#a7f3d0;margin-top:4px">商品 ${best.itemTotal.toLocaleString()}円 ＋ 送料等 ${best.shipping.toLocaleString()}円</div>
+      </div>`;
+
+    html += complete.map((r, i) => `
+      <div class="rank-row">
+        <div class="rank">${i + 1}</div>
+        <div>
+          <div class="rank-shop">${esc(r.shop.name)}</div>
+          <div class="rank-note">商品 ${r.itemTotal.toLocaleString()}円 + 送料等 ${r.shipping.toLocaleString()}円</div>
+        </div>
+        <div class="rank-price">${r.total.toLocaleString()}円</div>
+      </div>`).join('');
+  } else {
+    html += '<div class="winner"><strong>1店舗比較はまだできません</strong><div class="rank-note">どのショップも全カード分の価格が揃っていません。</div></div>';
+  }
+
+  if (incomplete.length) {
+    html += '<div style="margin-top:10px">' + incomplete.map(r =>
+      `<span class="pill">${esc(r.shop.name)}：未入力${r.missing}種</span>`
+    ).join('') + '</div>';
+  }
+
+  if (mixed) {
+    html += `
+      <div class="mix-plan">
+        <div class="section-title" style="font-size:16px;margin-bottom:7px">買い分け最安</div>
+        <div class="winner">
+          <strong>${mixed.total.toLocaleString()}円</strong>
+          <div class="rank-note">複数ショップへの買い分け＋各ショップ送料込み</div>
+        </div>
+        ${mixed.assignments.map(a =>
+          `<div class="mix-line">${esc(a.card.name)} ×${a.card.qty} → <b>${esc(a.shop.name)}</b>（${a.unit.toLocaleString()}円/枚）</div>`
+        ).join('')}
+        <div style="margin-top:8px">${mixed.usedShops.map(s => `<span class="pill">${esc(s.name)} 送料等 ${Number(state.shipping[s.id] || 0).toLocaleString()}円</span>`).join('')}</div>
+      </div>`;
+  } else {
+    html += '<div class="mix-plan"><div class="section-title" style="font-size:16px">買い分け最安</div><div class="rank-note">少なくとも各カードについて、どこか1店舗の価格を入力すると計算できます。</div></div>';
+  }
+
+  result.innerHTML = html;
+  result.style.display = 'block';
+  result.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function calculateMixedPlan() {
+  const n = SHOPS.length;
+  let best = null;
+
+  for (let mask = 1; mask < (1 << n); mask++) {
+    let productTotal = 0;
+    const assignments = [];
+    let possible = true;
+
+    for (const card of state.deck) {
+      let bestShop = null;
+      let bestUnit = Infinity;
+
+      for (let i = 0; i < n; i++) {
+        if (!(mask & (1 << i))) continue;
+        const shop = SHOPS[i];
+        const price = card.prices[shop.id];
+        if (price == null || price === '') continue;
+        const unit = Number(price);
+        if (unit < bestUnit) {
+          bestUnit = unit;
+          bestShop = shop;
+        }
+      }
+
+      if (!bestShop) {
+        possible = false;
+        break;
+      }
+
+      productTotal += bestUnit * Number(card.qty);
+      assignments.push({ card, shop: bestShop, unit: bestUnit });
+    }
+
+    if (!possible) continue;
+
+    const actuallyUsedIds = [...new Set(assignments.map(a => a.shop.id))];
+    const shippingTotal = actuallyUsedIds.reduce((sum, id) => sum + Number(state.shipping[id] || 0), 0);
+    const total = productTotal + shippingTotal;
+
+    if (!best || total < best.total) {
+      best = {
+        total,
+        productTotal,
+        shippingTotal,
+        assignments,
+        usedShops: SHOPS.filter(s => actuallyUsedIds.includes(s.id))
+      };
+    }
+  }
+
+  return best;
+}
+
+const singleInput = document.getElementById('singleCard');
+singleInput.addEventListener('input', renderSuggestions);
+singleInput.addEventListener('focus', renderSuggestions);
+singleInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    const first = findSuggestions(singleInput.value, 1)[0];
+    if (first) selectSuggestion(first.name);
+  }
+});
+document.addEventListener('click', e => {
+  if (!e.target.closest('.search-wrap')) {
+    document.getElementById('suggestions').style.display = 'none';
+  }
+});
+
+renderSingleButtons();
+renderDeck();
+renderShipping();
 </script>
-
 </body>
 </html>
