@@ -1,1 +1,756 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#111827">
 
+  <title>デュエマ価格比較</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+        "Hiragino Sans", "Yu Gothic", sans-serif;
+      background: #0f172a;
+      color: #f8fafc;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 20px 16px 50px;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 28px;
+      margin: 15px 0 8px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #94a3b8;
+      font-size: 14px;
+      margin-bottom: 25px;
+    }
+
+    .card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 18px;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 12px;
+    }
+
+    input {
+      width: 100%;
+      border: 1px solid #475569;
+      background: #0f172a;
+      color: white;
+      font-size: 16px;
+      padding: 13px;
+      border-radius: 10px;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: #3b82f6;
+    }
+
+    .shop-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    button {
+      border: none;
+      border-radius: 10px;
+      padding: 13px 8px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .shop-button {
+      background: #334155;
+      color: white;
+    }
+
+    .shop-button:active {
+      background: #475569;
+    }
+
+    .compare-button {
+      width: 100%;
+      background: #2563eb;
+      color: white;
+      font-size: 17px;
+      margin-top: 15px;
+    }
+
+    .reset-button {
+      width: 100%;
+      background: #475569;
+      color: white;
+      margin-top: 10px;
+    }
+
+    .shop-row {
+      border-bottom: 1px solid #334155;
+      padding: 14px 0;
+    }
+
+    .shop-row:last-child {
+      border-bottom: none;
+    }
+
+    .shop-name {
+      font-weight: bold;
+      margin-bottom: 9px;
+      font-size: 16px;
+    }
+
+    .price-area {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .price-box label {
+      display: block;
+      font-size: 12px;
+      color: #94a3b8;
+      margin-bottom: 5px;
+    }
+
+    .price-box input {
+      padding: 10px;
+      font-size: 15px;
+    }
+
+    .total {
+      text-align: right;
+      margin-top: 8px;
+      font-size: 14px;
+      color: #cbd5e1;
+    }
+
+    #result {
+      display: none;
+      text-align: center;
+      padding: 22px 15px;
+      border-radius: 14px;
+      background: #064e3b;
+      border: 1px solid #10b981;
+      margin-top: 15px;
+    }
+
+    .winner-label {
+      color: #a7f3d0;
+      font-size: 14px;
+    }
+
+    .winner-shop {
+      font-size: 25px;
+      font-weight: bold;
+      margin: 8px 0;
+    }
+
+    .winner-price {
+      font-size: 21px;
+      font-weight: bold;
+    }
+
+    .note {
+      font-size: 12px;
+      color: #94a3b8;
+      line-height: 1.7;
+      margin-top: 15px;
+    }
+
+    @media (max-width: 420px) {
+      .shop-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      h1 {
+        font-size: 25px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>デュエマ価格比較</h1>
+
+  <div class="subtitle">
+    欲しいカードを一番安く買えるショップを比較
+  </div>
+
+
+  <div class="card">
+
+    <div class="section-title">
+      カード検索
+    </div>
+
+    <input
+      id="cardName"
+      type="text"
+      placeholder="例：支配の精霊ペルフェクト"
+    >
+
+    <div class="shop-grid">
+
+      <button class="shop-button"
+        onclick="searchShop('カードラッシュ')">
+        カードラッシュ
+      </button>
+
+      <button class="shop-button"
+        onclick="searchShop('カーナベル')">
+        カーナベル
+      </button>
+
+      <button class="shop-button"
+        onclick="searchShop('駿河屋')">
+        駿河屋
+      </button>
+
+      <button class="shop-button"
+        onclick="searchShop('遊々亭')">
+        遊々亭
+      </button>
+
+      <button class="shop-button"
+        onclick="searchShop('Amazon')">
+        Amazon
+      </button>
+
+      <button class="shop-button"
+        onclick="searchShop('楽天市場')">
+        楽天
+      </button>
+
+      <button class="shop-button"
+        onclick="searchShop('Yahooショッピング')">
+        Yahoo!
+      </button>
+
+      <button class="shop-button"
+        onclick="searchShop('メルカリ')">
+        メルカリ
+      </button>
+
+    </div>
+
+    <div class="note">
+      カード名を入力してショップを押すと、そのカードを検索します。
+    </div>
+
+  </div>
+
+
+  <div class="card">
+
+    <div class="section-title">
+      価格を比較
+    </div>
+
+
+    <div class="shop-row">
+
+      <div class="shop-name">
+        カードラッシュ
+      </div>
+
+      <div class="price-area">
+
+        <div class="price-box">
+          <label>カード価格</label>
+          <input
+            type="number"
+            class="price"
+            data-shop="カードラッシュ"
+            placeholder="0"
+          >
+        </div>
+
+        <div class="price-box">
+          <label>送料</label>
+          <input
+            type="number"
+            class="shipping"
+            placeholder="0"
+          >
+        </div>
+
+      </div>
+
+      <div class="total"></div>
+
+    </div>
+
+
+    <div class="shop-row">
+
+      <div class="shop-name">
+        カーナベル
+      </div>
+
+      <div class="price-area">
+
+        <div class="price-box">
+          <label>カード価格</label>
+          <input
+            type="number"
+            class="price"
+            data-shop="カーナベル"
+            placeholder="0"
+          >
+        </div>
+
+        <div class="price-box">
+          <label>送料</label>
+          <input
+            type="number"
+            class="shipping"
+            placeholder="0"
+          >
+        </div>
+
+      </div>
+
+      <div class="total"></div>
+
+    </div>
+
+
+    <div class="shop-row">
+
+      <div class="shop-name">
+        駿河屋
+      </div>
+
+      <div class="price-area">
+
+        <div class="price-box">
+          <label>カード価格</label>
+          <input
+            type="number"
+            class="price"
+            data-shop="駿河屋"
+            placeholder="0"
+          >
+        </div>
+
+        <div class="price-box">
+          <label>送料・手数料</label>
+          <input
+            type="number"
+            class="shipping"
+            placeholder="0"
+          >
+        </div>
+
+      </div>
+
+      <div class="total"></div>
+
+    </div>
+
+
+    <div class="shop-row">
+
+      <div class="shop-name">
+        遊々亭
+      </div>
+
+      <div class="price-area">
+
+        <div class="price-box">
+          <label>カード価格</label>
+          <input
+            type="number"
+            class="price"
+            data-shop="遊々亭"
+            placeholder="0"
+          >
+        </div>
+
+        <div class="price-box">
+          <label>送料</label>
+          <input
+            type="number"
+            class="shipping"
+            placeholder="0"
+          >
+        </div>
+
+      </div>
+
+      <div class="total"></div>
+
+    </div>
+
+
+    <div class="shop-row">
+
+      <div class="shop-name">
+        Amazon
+      </div>
+
+      <div class="price-area">
+
+        <div class="price-box">
+          <label>カード価格</label>
+          <input
+            type="number"
+            class="price"
+            data-shop="Amazon"
+            placeholder="0"
+          >
+        </div>
+
+        <div class="price-box">
+          <label>送料</label>
+          <input
+            type="number"
+            class="shipping"
+            placeholder="0"
+          >
+        </div>
+
+      </div>
+
+      <div class="total"></div>
+
+    </div>
+
+
+    <div class="shop-row">
+
+      <div class="shop-name">
+        楽天市場
+      </div>
+
+      <div class="price-area">
+
+        <div class="price-box">
+          <label>カード価格</label>
+          <input
+            type="number"
+            class="price"
+            data-shop="楽天市場"
+            placeholder="0"
+          >
+        </div>
+
+        <div class="price-box">
+          <label>送料</label>
+          <input
+            type="number"
+            class="shipping"
+            placeholder="0"
+          >
+        </div>
+
+      </div>
+
+      <div class="total"></div>
+
+    </div>
+
+
+    <div class="shop-row">
+
+      <div class="shop-name">
+        Yahoo!ショッピング
+      </div>
+
+      <div class="price-area">
+
+        <div class="price-box">
+          <label>カード価格</label>
+          <input
+            type="number"
+            class="price"
+            data-shop="Yahoo!ショッピング"
+            placeholder="0"
+          >
+        </div>
+
+        <div class="price-box">
+          <label>送料</label>
+          <input
+            type="number"
+            class="shipping"
+            placeholder="0"
+          >
+        </div>
+
+      </div>
+
+      <div class="total"></div>
+
+    </div>
+
+
+    <div class="shop-row">
+
+      <div class="shop-name">
+        メルカリ
+      </div>
+
+      <div class="price-area">
+
+        <div class="price-box">
+          <label>カード価格</label>
+          <input
+            type="number"
+            class="price"
+            data-shop="メルカリ"
+            placeholder="0"
+          >
+        </div>
+
+        <div class="price-box">
+          <label>送料</label>
+          <input
+            type="number"
+            class="shipping"
+            placeholder="0"
+          >
+        </div>
+
+      </div>
+
+      <div class="total"></div>
+
+    </div>
+
+
+    <button
+      class="compare-button"
+      onclick="comparePrices()">
+      最安値を調べる
+    </button>
+
+    <button
+      class="reset-button"
+      onclick="resetPrices()">
+      入力をリセット
+    </button>
+
+
+    <div id="result">
+
+      <div class="winner-label">
+        一番安いショップ
+      </div>
+
+      <div
+        id="winnerShop"
+        class="winner-shop">
+      </div>
+
+      <div
+        id="winnerPrice"
+        class="winner-price">
+      </div>
+
+    </div>
+
+
+    <div class="note">
+      価格を入力していないショップは比較対象から除外されます。
+      送料や通販手数料も含めて比較できます。
+    </div>
+
+  </div>
+
+</div>
+
+
+<script>
+
+function searchShop(shop) {
+
+  const card =
+    document.getElementById("cardName").value.trim();
+
+  if (!card) {
+
+    alert("カード名を入力してください");
+
+    return;
+
+  }
+
+  const query =
+    encodeURIComponent(
+      "デュエルマスターズ " +
+      card +
+      " " +
+      shop
+    );
+
+  const url =
+    "https://www.google.com/search?q=" +
+    query;
+
+  window.open(
+    url,
+    "_blank"
+  );
+
+}
+
+
+function comparePrices() {
+
+  const rows =
+    document.querySelectorAll(".shop-row");
+
+  let cheapestShop = "";
+  let cheapestPrice = Infinity;
+  let found = false;
+
+
+  rows.forEach(row => {
+
+    const priceInput =
+      row.querySelector(".price");
+
+    const shippingInput =
+      row.querySelector(".shipping");
+
+    const totalDisplay =
+      row.querySelector(".total");
+
+
+    const price =
+      Number(priceInput.value);
+
+    const shipping =
+      Number(shippingInput.value || 0);
+
+
+    if (
+      priceInput.value !== "" &&
+      price > 0
+    ) {
+
+      const total =
+        price + shipping;
+
+      totalDisplay.textContent =
+        "合計 " +
+        total.toLocaleString() +
+        "円";
+
+
+      if (total < cheapestPrice) {
+
+        cheapestPrice = total;
+
+        cheapestShop =
+          priceInput.dataset.shop;
+
+        found = true;
+
+      }
+
+    } else {
+
+      totalDisplay.textContent = "";
+
+    }
+
+  });
+
+
+  if (!found) {
+
+    alert(
+      "比較する価格を入力してください"
+    );
+
+    return;
+
+  }
+
+
+  document.getElementById(
+    "winnerShop"
+  ).textContent =
+    cheapestShop;
+
+
+  document.getElementById(
+    "winnerPrice"
+  ).textContent =
+    cheapestPrice.toLocaleString() +
+    "円";
+
+
+  document.getElementById(
+    "result"
+  ).style.display =
+    "block";
+
+}
+
+
+function resetPrices() {
+
+  document
+    .querySelectorAll(
+      ".price, .shipping"
+    )
+    .forEach(input => {
+
+      input.value = "";
+
+    });
+
+
+  document
+    .querySelectorAll(
+      ".total"
+    )
+    .forEach(total => {
+
+      total.textContent = "";
+
+    });
+
+
+  document.getElementById(
+    "result"
+  ).style.display =
+    "none";
+
+}
+
+</script>
+
+</body>
+</html>
